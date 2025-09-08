@@ -64,11 +64,6 @@ public class Transaccion {
             throw new IllegalArgumentException("Una transferencia requiere cuenta destino");
         }
 
-        if ((tipoTransaccion == TipoTransaccion.CONSIGNACION ||
-                tipoTransaccion == TipoTransaccion.RETIRO) && cuentaDestinoId != null) {
-            throw new IllegalArgumentException("Consignaciones y retiros no requieren cuenta destino");
-        }
-
         if (cuentaOrigenId != null && cuentaOrigenId.equals(cuentaDestinoId)) {
             throw new IllegalArgumentException("La cuenta origen y destino no pueden ser iguales");
         }

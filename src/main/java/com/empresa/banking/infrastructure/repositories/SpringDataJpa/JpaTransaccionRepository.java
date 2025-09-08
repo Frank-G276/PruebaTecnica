@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface JpaTransaccionRepository extends JpaRepository<TransaccionEntity, Long> {
-    List<TransaccionEntity> findByAccountNumber(Long id);
-    void deleteByAccountNumber(Long id);
+    List<TransaccionEntity> findByCuentaOrigenId(Long cuentaOrigenId);
+    void deleteByCuentaOrigenId(Long cuentaOrigenId);
 }

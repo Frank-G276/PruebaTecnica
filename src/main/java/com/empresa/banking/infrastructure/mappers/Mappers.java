@@ -85,6 +85,10 @@ public class Mappers {
     }
 
     public Transaccion transaccionToDomain(TransaccionEntity transaccion){
+        Long cuentaDestinoId = null;
+        if (transaccion.getCuentaDestino() != null) {
+            cuentaDestinoId = transaccion.getCuentaDestino().getId();
+        }
         return new Transaccion(
                 transaccion.getId(),
                 transaccion.getTipoTransaccion(),
@@ -92,15 +96,24 @@ public class Mappers {
                 transaccion.getDescripcion(),
                 transaccion.getFechaTransaccion(),
                 transaccion.getCuentaOrigen().getId(),
-                transaccion.getCuentaDestino().getId(),
+                cuentaDestinoId,
                 transaccion.getSaldoAnterior(),
                 transaccion.getSaldoActual()
         );
     }
 
     public TransaccionEntity transaccionFromDomain(Transaccion transaccion){
-        ProductoEntity cuentaOrigen = jpaProductoRepository.findById(transaccion.getCuentaOrigenId()).orElseThrow();
-        ProductoEntity cuentaDestino = jpaProductoRepository.findById(transaccion.getCuentaDestinoId()).orElseThrow();
+        // Cuenta Origen (NUNCA debe ser null)
+        ProductoEntity cuentaOrigen = jpaProductoRepository.findById(transaccion.getCuentaOrigenId())
+                .orElseThrow(() -> new EntityNotFoundException("Cuenta origen no encontrada con ID: " + transaccion.getCuentaOrigenId()));
+
+        // Cuenta Destino (PUEDE ser null)
+        ProductoEntity cuentaDestino = null;
+        if (transaccion.getCuentaDestinoId() != null) {
+            cuentaDestino = jpaProductoRepository.findById(transaccion.getCuentaDestinoId())
+                    .orElseThrow(() -> new EntityNotFoundException("Cuenta destino no encontrada con ID: " + transaccion.getCuentaDestinoId()));
+        }
+
         TransaccionEntity entity = new TransaccionEntity();
         entity.setId(transaccion.getId());
         entity.setTipoTransaccion(transaccion.getTipoTransaccion());

@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface TransaccionRepository {
     Optional<Transaccion> findById(Long id);
-    List<Transaccion> findByCountNumber(Long countNumber);
+    List<Transaccion> findByAccountNumber(Long countNumber);
     List<Transaccion> findAll();
     Transaccion save(Transaccion transaccion);
     void deleteById(Long id);

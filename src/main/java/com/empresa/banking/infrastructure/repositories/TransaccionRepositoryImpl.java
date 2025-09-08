@@ -6,12 +6,12 @@ import com.empresa.banking.infrastructure.entities.TransaccionEntity;
 import com.empresa.banking.infrastructure.mappers.Mappers;
 import com.empresa.banking.infrastructure.repositories.SpringDataJpa.JpaTransaccionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
-@Component
+@Repository
 public class TransaccionRepositoryImpl implements TransaccionRepository {
 
     @Autowired
@@ -25,8 +25,8 @@ public class TransaccionRepositoryImpl implements TransaccionRepository {
     }
 
     @Override
-    public List<Transaccion> findByCountNumber(Long id){
-        return jpaTransaccionRepository.findByAccountNumber(id).stream().map(mapper::transaccionToDomain).toList();
+    public List<Transaccion> findByAccountNumber(Long id){
+        return jpaTransaccionRepository.findByCuentaOrigenId(id).stream().map(mapper::transaccionToDomain).toList();
     }
     @Override
     public List<Transaccion> findAll(){
@@ -46,6 +46,6 @@ public class TransaccionRepositoryImpl implements TransaccionRepository {
 
     @Override
     public void deleteByAccountNumber(Long id){
-        jpaTransaccionRepository.deleteByAccountNumber(id);
+        jpaTransaccionRepository.deleteByCuentaOrigenId(id);
     }
 }

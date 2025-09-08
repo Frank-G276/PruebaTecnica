@@ -49,6 +49,6 @@ public class ProductoRepositoryImpl implements ProductoRepository {
 
     @Override
     public boolean existByNumeroCuenta(String numeroCuenta) {
-        return jpaRepository.existByNumeroCuenta(numeroCuenta);
+        return jpaRepository.existsByNumeroCuenta(numeroCuenta);
     }
 }
