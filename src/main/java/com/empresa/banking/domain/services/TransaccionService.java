@@ -134,10 +134,10 @@ public class TransaccionService {
 
         // Crear transacción de crédito (cuenta destino)
         Transaccion transaccionCredito = Transaccion.crear(
-                TipoTransaccion.CONSIGNACION, // Se registra como consignación en la cuenta destino
+                TipoTransaccion.CONSIGNACION,
                 monto,
                 cuentaDestinoId,
-                cuentaOrigenId, // Referencia a la cuenta origen
+                cuentaOrigenId,
                 descripcion != null ? ("Transferencia recibida: " + descripcion) : "Transferencia recibida"
         );
         transaccionCredito = transaccionCredito.conSaldos(saldoAnteriorDestino, nuevoSaldoDestino);
