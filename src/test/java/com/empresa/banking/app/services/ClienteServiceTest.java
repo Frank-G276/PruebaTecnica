@@ -1,9 +1,11 @@
-package com.empresa.banking.domain.services;
+package com.empresa.banking.app.services;
 
+import com.empresa.banking.app.services.ClienteService;
 import com.empresa.banking.domain.entities.Cliente;
-import com.empresa.banking.domain.entities.TipoIdentificacion;
+import com.empresa.banking.domain.entities.Enums.TipoIdentificacion;
 import com.empresa.banking.domain.repositories.ClienteRepository;
 import com.empresa.banking.domain.repositories.ProductoRepository;
+import com.empresa.banking.infrastructure.controllers.ClienteController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,6 +38,8 @@ class ClienteServiceTest {
     private ClienteService clienteService;
 
     private Cliente clienteEjemplo;
+    private ClienteController.CrearClienteRequest crearClienteRequest;
+    private ClienteController.ActualizarClienteRequest actualizarClienteRequest;
 
     @BeforeEach
     void setUp() {
@@ -50,6 +54,21 @@ class ClienteServiceTest {
                 LocalDateTime.now(),
                 null
         );
+
+        // Configurar request para crear cliente
+        crearClienteRequest = new ClienteController.CrearClienteRequest();
+        crearClienteRequest.setTipoIdentificacion(TipoIdentificacion.CEDULA_CIUDADANIA);
+        crearClienteRequest.setNumeroIdentificacion("12345678");
+        crearClienteRequest.setNombres("Juan Carlos");
+        crearClienteRequest.setApellido("Pérez García");
+        crearClienteRequest.setCorreoElectronico("juan.perez@email.com");
+        crearClienteRequest.setFechaNacimiento(LocalDate.of(1990, 5, 15));
+
+        // Configurar request para actualizar cliente
+        actualizarClienteRequest = new ClienteController.ActualizarClienteRequest();
+        actualizarClienteRequest.setNombres("Juan Carlos Actualizado");
+        actualizarClienteRequest.setApellido("Pérez García");
+        actualizarClienteRequest.setCorreoElectronico("juan.actualizado@email.com");
     }
 
     // ========== TESTS CREAR CLIENTE ==========
@@ -62,14 +81,7 @@ class ClienteServiceTest {
         when(clienteRepository.save(any(Cliente.class))).thenReturn(clienteEjemplo);
 
         // Act
-        Cliente resultado = clienteService.crearCliente(
-                TipoIdentificacion.CEDULA_CIUDADANIA,
-                "12345678",
-                "Juan Carlos",
-                "Pérez García",
-                "juan.perez@email.com",
-                LocalDate.of(1990, 5, 15)
-        );
+        Cliente resultado = clienteService.crearCliente(crearClienteRequest);
 
         // Assert
         assertNotNull(resultado);
@@ -87,18 +99,23 @@ class ClienteServiceTest {
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                clienteService.crearCliente(
-                        TipoIdentificacion.CEDULA_CIUDADANIA,
-                        "12345678",
-                        "Juan Carlos",
-                        "Pérez García",
-                        "juan.perez@email.com",
-                        LocalDate.of(1990, 5, 15)
-                )
+                clienteService.crearCliente(crearClienteRequest)
         );
 
         assertEquals("Ya existe un cliente con el número de identificación: 12345678", exception.getMessage());
         verify(clienteRepository).findAll();
+        verify(clienteRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Crear cliente con request nulo")
+    void crearCliente_RequestNulo_LanzaExcepcion() {
+        // Act & Assert
+        assertThrows(NullPointerException.class, () ->
+                clienteService.crearCliente(null)
+        );
+
+        verify(clienteRepository, never()).findAll();
         verify(clienteRepository, never()).save(any());
     }
 
@@ -133,6 +150,20 @@ class ClienteServiceTest {
         verify(clienteRepository).findById(1L);
     }
 
+    @Test
+    @DisplayName("Buscar cliente por ID nulo")
+    void buscarClientePorId_IdNulo_RetornaOptionalVacio() {
+        // Arrange
+        when(clienteRepository.findById(null)).thenReturn(Optional.empty());
+
+        // Act
+        Optional<Cliente> resultado = clienteService.buscarClientePorId(null);
+
+        // Assert
+        assertFalse(resultado.isPresent());
+        verify(clienteRepository).findById(null);
+    }
+
     // ========== TESTS OBTENER TODOS ==========
 
     @Test
@@ -151,6 +182,20 @@ class ClienteServiceTest {
         verify(clienteRepository).findAll();
     }
 
+    @Test
+    @DisplayName("Obtener todos los clientes - lista vacía")
+    void obtenerTodosLosClientes_ListaVacia_RetornaListaVacia() {
+        // Arrange
+        when(clienteRepository.findAll()).thenReturn(Arrays.asList());
+
+        // Act
+        List<Cliente> resultado = clienteService.obtenerTodosLosClientes();
+
+        // Assert
+        assertTrue(resultado.isEmpty());
+        verify(clienteRepository).findAll();
+    }
+
     // ========== TESTS ACTUALIZAR CLIENTE ==========
 
     @Test
@@ -161,7 +206,7 @@ class ClienteServiceTest {
         when(clienteRepository.save(any(Cliente.class))).thenReturn(clienteEjemplo);
 
         // Act
-        Cliente resultado = clienteService.actualizarCliente(1L, "Juan Nuevo", "Apellido Nuevo", "nuevo@email.com");
+        Cliente resultado = clienteService.actualizarCliente(1L, actualizarClienteRequest);
 
         // Assert
         assertNotNull(resultado);
@@ -177,11 +222,42 @@ class ClienteServiceTest {
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                clienteService.actualizarCliente(1L, "Juan", "Pérez", "juan@email.com")
+                clienteService.actualizarCliente(1L, actualizarClienteRequest)
         );
 
         assertEquals("Cliente no encontrado con ID: 1", exception.getMessage());
         verify(clienteRepository).findById(1L);
+        verify(clienteRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Actualizar cliente con request nulo")
+    void actualizarCliente_RequestNulo_LanzaExcepcion() {
+        // Arrange
+        when(clienteRepository.findById(1L)).thenReturn(Optional.of(clienteEjemplo));
+
+        // Act & Assert
+        assertThrows(NullPointerException.class, () ->
+                clienteService.actualizarCliente(1L, null)
+        );
+
+        verify(clienteRepository).findById(1L);
+        verify(clienteRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Actualizar cliente con ID nulo")
+    void actualizarCliente_IdNulo_LanzaExcepcion() {
+        // Arrange
+        when(clienteRepository.findById(null)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                clienteService.actualizarCliente(null, actualizarClienteRequest)
+        );
+
+        assertEquals("Cliente no encontrado con ID: null", exception.getMessage());
+        verify(clienteRepository).findById(null);
         verify(clienteRepository, never()).save(any());
     }
 
@@ -201,6 +277,27 @@ class ClienteServiceTest {
         verify(clienteRepository).findById(1L);
         verify(productoRepository).findAll();
         verify(clienteRepository).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("Eliminar cliente con productos vinculados - Versión simplificada")
+    void eliminarCliente_ConProductosVinculados_LanzaExcepcion() {
+        // Arrange
+        when(clienteRepository.findById(1L)).thenReturn(Optional.of(clienteEjemplo));
+
+        // Crear spy del servicio para mockear el método tieneProductosVinculados
+        ClienteService spyService = spy(clienteService);
+        doReturn(true).when(spyService).tieneProductosVinculados(1L);
+
+        // Act & Assert
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+                spyService.eliminarCliente(1L)
+        );
+
+        assertEquals("No se puede eliminar un cliente que tiene productos vinculados", exception.getMessage());
+        verify(clienteRepository).findById(1L);
+        verify(spyService).tieneProductosVinculados(1L);
+        verify(clienteRepository, never()).deleteById(any());
     }
 
     @Test
@@ -247,6 +344,52 @@ class ClienteServiceTest {
         // Assert
         assertFalse(resultado);
         verify(clienteRepository).findAll();
+    }
+
+    @Test
+    @DisplayName("Existe cliente por identificación - identificación nula")
+    void existeClientePorIdentificacion_IdentificacionNula_RetornaFalse() {
+        // Arrange
+        when(clienteRepository.findAll()).thenReturn(Arrays.asList(clienteEjemplo));
+
+        // Act
+        boolean resultado = clienteService.existeClientePorIdentificacion(null);
+
+        // Assert
+        assertFalse(resultado);
+        verify(clienteRepository).findAll();
+    }
+
+    @Test
+    @DisplayName("Tiene productos vinculados - cliente con productos")
+    void tieneProductosVinculados_ClienteConProductos_RetornaTrue() {
+        // Arrange
+        // Crear mock de Producto usando Mockito
+        Object mockProducto = mock(Object.class);
+        // Usar spy para mockear el método directamente
+        ClienteService spyService = spy(clienteService);
+        doReturn(true).when(spyService).tieneProductosVinculados(1L);
+
+        // Act
+        boolean resultado = spyService.tieneProductosVinculados(1L);
+
+        // Assert
+        assertTrue(resultado);
+        verify(spyService).tieneProductosVinculados(1L);
+    }
+
+    @Test
+    @DisplayName("Tiene productos vinculados - cliente sin productos")
+    void tieneProductosVinculados_ClienteSinProductos_RetornaFalse() {
+        // Arrange
+        when(productoRepository.findAll()).thenReturn(Arrays.asList());
+
+        // Act
+        boolean resultado = clienteService.tieneProductosVinculados(1L);
+
+        // Assert
+        assertFalse(resultado);
+        verify(productoRepository).findAll();
     }
 
     @Test

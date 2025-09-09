@@ -1,7 +1,10 @@
 package com.empresa.banking.infrastructure.controllers;
 
 import com.empresa.banking.domain.entities.*;
-import com.empresa.banking.domain.services.TransaccionService;
+import com.empresa.banking.domain.entities.Enums.EstadoCuenta;
+import com.empresa.banking.domain.entities.Enums.TipoCuenta;
+import com.empresa.banking.domain.entities.Enums.TipoTransaccion;
+import com.empresa.banking.app.services.TransaccionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,7 +23,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;

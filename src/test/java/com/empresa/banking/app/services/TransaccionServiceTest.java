@@ -1,6 +1,10 @@
-package com.empresa.banking.domain.services;
+package com.empresa.banking.app.services;
 
+import com.empresa.banking.app.services.TransaccionService;
 import com.empresa.banking.domain.entities.*;
+import com.empresa.banking.domain.entities.Enums.EstadoCuenta;
+import com.empresa.banking.domain.entities.Enums.TipoCuenta;
+import com.empresa.banking.domain.entities.Enums.TipoTransaccion;
 import com.empresa.banking.domain.repositories.ProductoRepository;
 import com.empresa.banking.domain.repositories.TransaccionRepository;
 import org.junit.jupiter.api.BeforeEach;

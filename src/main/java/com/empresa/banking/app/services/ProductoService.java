@@ -1,9 +1,14 @@
-package com.empresa.banking.domain.services;
+package com.empresa.banking.app.services;
 
+import com.empresa.banking.app.interfaces.IProductoService;
 import com.empresa.banking.domain.entities.*;
+import com.empresa.banking.domain.entities.Enums.EstadoCuenta;
+import com.empresa.banking.domain.entities.Enums.TipoCuenta;
+import com.empresa.banking.domain.entities.Enums.TipoTransaccion;
 import com.empresa.banking.domain.repositories.ClienteRepository;
 import com.empresa.banking.domain.repositories.ProductoRepository;
 import com.empresa.banking.domain.repositories.TransaccionRepository;
+import com.empresa.banking.infrastructure.controllers.ProductoController;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,7 +18,7 @@ import java.util.Optional;
 
 @Service
 @Transactional
-public class ProductoService {
+public class ProductoService implements IProductoService {
 
     private final ProductoRepository productoRepository;
     private final ClienteRepository clienteRepository;
@@ -30,27 +35,27 @@ public class ProductoService {
     /**
      * Crea un nuevo producto financiero
      */
-    public Producto crearProducto(TipoCuenta tipoCuenta, Long clienteId, BigDecimal saldoInicial, Boolean exentaGmf) {
+    public Producto crearProducto(ProductoController.CrearProductoRequest request) {
         // Validar que el cliente existe
-        Cliente cliente = clienteRepository.findById(clienteId)
-                .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado con ID: " + clienteId));
+        Cliente cliente = clienteRepository.findById(request.getClienteId())
+                .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado con ID: " + request.getClienteId()));
 
         // Crear el producto con número de cuenta auto-generado
         String numeroCuenta;
         do {
-            numeroCuenta = generarNumeroCuenta(tipoCuenta);
+            numeroCuenta = generarNumeroCuenta(request.getTipoCuenta());
         } while (productoRepository.existByNumeroCuenta(numeroCuenta));
 
         Producto nuevoProducto = new Producto(
                 null,
-                tipoCuenta,
+                request.getTipoCuenta(),
                 numeroCuenta,
                 EstadoCuenta.ACTIVA, // Las cuentas se crean activas por defecto
-                saldoInicial != null ? saldoInicial : BigDecimal.ZERO,
-                exentaGmf,
+                request.getSaldoInicial() != null ? request.getSaldoInicial() : BigDecimal.ZERO,
+                request.getExentaGmf(),
                 null,
                 null,
-                clienteId
+                request.getClienteId()
         );
 
         return productoRepository.save(nuevoProducto);

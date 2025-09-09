@@ -1,6 +1,7 @@
 package com.empresa.banking.infrastructure.entities;
 
-import com.empresa.banking.domain.entities.*;
+import com.empresa.banking.domain.entities.Enums.EstadoCuenta;
+import com.empresa.banking.domain.entities.Enums.TipoCuenta;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

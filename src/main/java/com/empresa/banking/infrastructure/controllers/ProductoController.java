@@ -1,10 +1,11 @@
 package com.empresa.banking.infrastructure.controllers;
 
-import com.empresa.banking.domain.entities.EstadoCuenta;
+import com.empresa.banking.app.interfaces.IProductoService;
+import com.empresa.banking.domain.entities.Enums.EstadoCuenta;
 import com.empresa.banking.domain.entities.Producto;
-import com.empresa.banking.domain.entities.TipoCuenta;
-import com.empresa.banking.domain.entities.TipoTransaccion;
-import com.empresa.banking.domain.services.ProductoService;
+import com.empresa.banking.domain.entities.Enums.TipoCuenta;
+import com.empresa.banking.domain.entities.Enums.TipoTransaccion;
+import com.empresa.banking.app.services.ProductoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -29,11 +30,12 @@ import java.util.Optional;
 @Tag(name = "Productos", description = "API para gestión de productos financieros (cuentas bancarias)")
 public class ProductoController {
 
-    private final ProductoService productoService;
+    private final IProductoService productoService;
 
-    public ProductoController(ProductoService productoService) {
+    public ProductoController(IProductoService productoService) {
         this.productoService = productoService;
     }
+
 
     @Operation(
             summary = "Crear un nuevo producto financiero",
@@ -61,12 +63,7 @@ public class ProductoController {
     @PostMapping
     public ResponseEntity<?> crearProducto(@Valid @RequestBody CrearProductoRequest request) {
         try {
-            Producto producto = productoService.crearProducto(
-                    request.getTipoCuenta(),
-                    request.getClienteId(),
-                    request.getSaldoInicial(),
-                    request.getExentaGmf()
-            );
+            Producto producto = productoService.crearProducto( request);
             return ResponseEntity.status(HttpStatus.CREATED).body(producto);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));

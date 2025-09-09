@@ -1,6 +1,10 @@
-package com.empresa.banking.domain.services;
+package com.empresa.banking.app.services;
 
+import com.empresa.banking.app.interfaces.ITransaccionService;
 import com.empresa.banking.domain.entities.*;
+import com.empresa.banking.domain.entities.Enums.EstadoCuenta;
+import com.empresa.banking.domain.entities.Enums.TipoCuenta;
+import com.empresa.banking.domain.entities.Enums.TipoTransaccion;
 import com.empresa.banking.domain.repositories.ProductoRepository;
 import com.empresa.banking.domain.repositories.TransaccionRepository;
 import org.springframework.stereotype.Service;
@@ -13,7 +17,7 @@ import java.util.Optional;
 
 @Service
 @Transactional
-public class TransaccionService {
+public class TransaccionService implements ITransaccionService {
 
     private final TransaccionRepository transaccionRepository;
     private final ProductoRepository productoRepository;

@@ -1,4 +1,4 @@
-package com.empresa.banking.domain.entities;
+package com.empresa.banking.domain.entities.Enums;
 
 public enum TipoTransaccion {
     CONSIGNACION("Consignación"),

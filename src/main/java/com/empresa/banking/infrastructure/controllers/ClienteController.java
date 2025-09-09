@@ -1,8 +1,9 @@
 package com.empresa.banking.infrastructure.controllers;
 
+import com.empresa.banking.app.interfaces.IClienteService;
 import com.empresa.banking.domain.entities.Cliente;
-import com.empresa.banking.domain.entities.TipoIdentificacion;
-import com.empresa.banking.domain.services.ClienteService;
+import com.empresa.banking.domain.entities.Enums.TipoIdentificacion;
+import com.empresa.banking.app.services.ClienteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,6 +16,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,11 +31,12 @@ import java.util.Optional;
 @Tag(name = "Clientes", description = "API para gestión de clientes bancarios")
 public class ClienteController {
 
-    private final ClienteService clienteService;
+    private final IClienteService clienteService;
 
-    public ClienteController(ClienteService clienteService) {
+    public ClienteController(IClienteService clienteService) {
         this.clienteService = clienteService;
     }
+
 
     @Operation(
             summary = "Crear un nuevo cliente",
@@ -60,14 +63,7 @@ public class ClienteController {
     public ResponseEntity<?> crearCliente(
             @Valid @RequestBody CrearClienteRequest request) {
         try {
-            Cliente cliente = clienteService.crearCliente(
-                    request.getTipoIdentificacion(),
-                    request.getNumeroIdentificacion(),
-                    request.getNombres(),
-                    request.getApellido(),
-                    request.getCorreoElectronico(),
-                    request.getFechaNacimiento()
-            );
+            Cliente cliente = clienteService.crearCliente(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(cliente);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
@@ -168,12 +164,7 @@ public class ClienteController {
             @PathVariable Long id,
             @Valid @RequestBody ActualizarClienteRequest request) {
         try {
-            Cliente clienteActualizado = clienteService.actualizarCliente(
-                    id,
-                    request.getNombres(),
-                    request.getApellido(),
-                    request.getCorreoElectronico()
-            );
+            Cliente clienteActualizado = clienteService.actualizarCliente(id, request);
             return ResponseEntity.ok(clienteActualizado);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
@@ -322,6 +313,7 @@ public class ClienteController {
         public String getCorreoElectronico() { return correoElectronico; }
         public void setCorreoElectronico(String correoElectronico) { this.correoElectronico = correoElectronico; }
     }
+
 
     @Schema(description = "Respuesta de error estándar")
     public static class ErrorResponse {

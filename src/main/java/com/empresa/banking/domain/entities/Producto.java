@@ -1,5 +1,9 @@
 package com.empresa.banking.domain.entities;
 
+import com.empresa.banking.domain.entities.Enums.EstadoCuenta;
+import com.empresa.banking.domain.entities.Enums.TipoCuenta;
+import com.empresa.banking.domain.entities.Enums.TipoTransaccion;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;

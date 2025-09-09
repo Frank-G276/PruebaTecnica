@@ -1,9 +1,10 @@
 package com.empresa.banking.domain.entities;
 
+import com.empresa.banking.domain.entities.Enums.TipoIdentificacion;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
-import java.util.List;
 import java.util.Objects;
 
 public class Cliente {

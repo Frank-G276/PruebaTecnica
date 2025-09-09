@@ -1,6 +1,6 @@
 package com.empresa.banking.infrastructure.entities;
 
-import com.empresa.banking.domain.entities.*;
+import com.empresa.banking.domain.entities.Enums.TipoIdentificacion;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

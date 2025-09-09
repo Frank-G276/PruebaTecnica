@@ -1,9 +1,15 @@
-package com.empresa.banking.domain.services;
+package com.empresa.banking.app.services;
 
+import com.empresa.banking.app.services.ProductoService;
 import com.empresa.banking.domain.entities.*;
+import com.empresa.banking.domain.entities.Enums.EstadoCuenta;
+import com.empresa.banking.domain.entities.Enums.TipoCuenta;
+import com.empresa.banking.domain.entities.Enums.TipoIdentificacion;
+import com.empresa.banking.domain.entities.Enums.TipoTransaccion;
 import com.empresa.banking.domain.repositories.ClienteRepository;
 import com.empresa.banking.domain.repositories.ProductoRepository;
 import com.empresa.banking.domain.repositories.TransaccionRepository;
+import com.empresa.banking.infrastructure.controllers.ProductoController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,6 +45,7 @@ class ProductoServiceTest {
     @InjectMocks
     private ProductoService productoService;
 
+    private ProductoController.CrearProductoRequest crearProductoRequest;
     private Cliente clienteEjemplo;
     private Producto productoEjemplo;
 
@@ -67,6 +74,12 @@ class ProductoServiceTest {
                 null,
                 1L
         );
+        // Configurar request para crear producto
+        crearProductoRequest = new ProductoController.CrearProductoRequest();
+        crearProductoRequest.setTipoCuenta(TipoCuenta.CUENTA_AHORROS);
+        crearProductoRequest.setClienteId(1L);
+        crearProductoRequest.setSaldoInicial(BigDecimal.valueOf(1000));
+        crearProductoRequest.setExentaGmf(false);
     }
 
     // ========== TESTS CREAR PRODUCTO ==========
@@ -80,8 +93,7 @@ class ProductoServiceTest {
         when(productoRepository.save(any(Producto.class))).thenReturn(productoEjemplo);
 
         // Act
-        Producto resultado = productoService.crearProducto(
-                TipoCuenta.CUENTA_AHORROS, 1L, BigDecimal.valueOf(1000), false);
+        Producto resultado = productoService.crearProducto(crearProductoRequest);
 
         // Assert
         assertNotNull(resultado);
@@ -94,12 +106,13 @@ class ProductoServiceTest {
     @Test
     @DisplayName("Crear producto con cliente inexistente")
     void crearProducto_ClienteInexistente_LanzaExcepcion() {
-        // Arrange
+        // Arrange4
+        crearProductoRequest.setClienteId(999L);
         when(clienteRepository.findById(999L)).thenReturn(Optional.empty());
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
-                productoService.crearProducto(TipoCuenta.CUENTA_AHORROS, 999L, BigDecimal.ZERO, false)
+                productoService.crearProducto(crearProductoRequest)
         );
 
         assertEquals("Cliente no encontrado con ID: 999", exception.getMessage());
@@ -118,8 +131,7 @@ class ProductoServiceTest {
         when(productoRepository.save(any(Producto.class))).thenReturn(productoEjemplo);
 
         // Act
-        Producto resultado = productoService.crearProducto(
-                TipoCuenta.CUENTA_AHORROS, 1L, BigDecimal.ZERO, false);
+        Producto resultado = productoService.crearProducto(crearProductoRequest);
 
         // Assert
         assertNotNull(resultado);

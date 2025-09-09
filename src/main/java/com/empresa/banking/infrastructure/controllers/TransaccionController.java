@@ -1,7 +1,8 @@
 package com.empresa.banking.infrastructure.controllers;
 
+import com.empresa.banking.app.interfaces.ITransaccionService;
 import com.empresa.banking.domain.entities.Transaccion;
-import com.empresa.banking.domain.services.TransaccionService;
+import com.empresa.banking.app.services.TransaccionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -11,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,11 +27,12 @@ import java.util.Optional;
 @Tag(name = "Transacciones", description = "API para gestión de transacciones bancarias (consignaciones, retiros y transferencias)")
 public class TransaccionController {
 
-    private final TransaccionService transaccionService;
+    private final ITransaccionService transaccionService;
 
-    public TransaccionController(TransaccionService transaccionService) {
+    public TransaccionController(ITransaccionService transaccionService) {
         this.transaccionService = transaccionService;
     }
+
 
     @Operation(
             summary = "Realizar consignación",

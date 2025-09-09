@@ -1,19 +1,19 @@
-package com.empresa.banking.domain.services;
+package com.empresa.banking.app.services;
 
+import com.empresa.banking.app.interfaces.IClienteService;
 import com.empresa.banking.domain.entities.Cliente;
-import com.empresa.banking.domain.entities.TipoIdentificacion;
 import com.empresa.banking.domain.repositories.ClienteRepository;
 import com.empresa.banking.domain.repositories.ProductoRepository;
+import com.empresa.banking.infrastructure.controllers.ClienteController;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @Transactional
-public class ClienteService {
+public class ClienteService implements IClienteService {
 
     private final ClienteRepository clienteRepository;
     private final ProductoRepository productoRepository;
@@ -26,17 +26,15 @@ public class ClienteService {
     /**
      * Crea un nuevo cliente
      */
-    public Cliente crearCliente(TipoIdentificacion tipoIdentificacion, String numeroIdentificacion,
-                                String nombres, String apellido, String correoElectronico,
-                                LocalDate fechaNacimiento) {
+    public Cliente crearCliente(ClienteController.CrearClienteRequest request) {
 
         // Verificar si el cliente ya existe
-        if (existeClientePorIdentificacion(numeroIdentificacion)) {
-            throw new IllegalArgumentException("Ya existe un cliente con el número de identificación: " + numeroIdentificacion);
+        if (existeClientePorIdentificacion(request.getNumeroIdentificacion())) {
+            throw new IllegalArgumentException("Ya existe un cliente con el número de identificación: " + request.getNumeroIdentificacion());
         }
 
-        Cliente nuevoCliente = Cliente.crear(tipoIdentificacion, numeroIdentificacion,
-                nombres, apellido, correoElectronico, fechaNacimiento);
+        Cliente nuevoCliente = Cliente.crear(request.getTipoIdentificacion(), request.getNumeroIdentificacion(), request.getNombres(),request.getApellido(), request.getCorreoElectronico(),
+                request.getFechaNacimiento());
 
         return clienteRepository.save(nuevoCliente);
     }
@@ -60,11 +58,11 @@ public class ClienteService {
     /**
      * Actualiza la información de un cliente
      */
-    public Cliente actualizarCliente(Long id, String nombres, String apellido, String correoElectronico) {
+    public Cliente actualizarCliente(Long id, ClienteController.ActualizarClienteRequest request) {
         Cliente clienteExistente = clienteRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado con ID: " + id));
 
-        Cliente clienteActualizado = clienteExistente.actualizar(nombres, apellido, correoElectronico);
+        Cliente clienteActualizado = clienteExistente.actualizar(request.getNombres(), request.getApellido(), request.getCorreoElectronico());
 
         return clienteRepository.save(clienteActualizado);
     }

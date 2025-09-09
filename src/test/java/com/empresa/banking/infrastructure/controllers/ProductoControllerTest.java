@@ -1,7 +1,10 @@
 package com.empresa.banking.infrastructure.controllers;
 
 import com.empresa.banking.domain.entities.*;
-import com.empresa.banking.domain.services.ProductoService;
+import com.empresa.banking.domain.entities.Enums.EstadoCuenta;
+import com.empresa.banking.domain.entities.Enums.TipoCuenta;
+import com.empresa.banking.domain.entities.Enums.TipoTransaccion;
+import com.empresa.banking.app.services.ProductoService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -68,7 +71,7 @@ class ProductoControllerTest {
         request.setSaldoInicial(BigDecimal.valueOf(1000));
         request.setExentaGmf(false);
 
-        when(productoService.crearProducto(any(TipoCuenta.class), anyLong(), any(BigDecimal.class), anyBoolean()))
+        when(productoService.crearProducto(any(ProductoController.CrearProductoRequest.class)))
                 .thenReturn(productoEjemplo);
 
         // Act & Assert
@@ -82,7 +85,12 @@ class ProductoControllerTest {
                 .andExpect(jsonPath("$.saldo").value(1000))
                 .andExpect(jsonPath("$.clienteId").value(1L));
 
-        verify(productoService).crearProducto(TipoCuenta.CUENTA_AHORROS, 1L, BigDecimal.valueOf(1000), false);
+        verify(productoService).crearProducto(argThat(req ->
+                req.getTipoCuenta().equals(TipoCuenta.CUENTA_AHORROS) &&
+                        req.getClienteId().equals(1L) &&
+                        req.getSaldoInicial().equals(BigDecimal.valueOf(1000)) &&
+                        req.getExentaGmf().equals(false)
+        ));
     }
 
     @Test
@@ -95,7 +103,7 @@ class ProductoControllerTest {
         request.setSaldoInicial(BigDecimal.valueOf(1000));
         request.setExentaGmf(false);
 
-        when(productoService.crearProducto(any(TipoCuenta.class), anyLong(), any(BigDecimal.class), anyBoolean()))
+        when(productoService.crearProducto(any(ProductoController.CrearProductoRequest.class)))
                 .thenThrow(new IllegalArgumentException("Cliente no encontrado con ID: 999"));
 
         // Act & Assert
@@ -105,7 +113,7 @@ class ProductoControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.mensaje").value("Cliente no encontrado con ID: 999"));
 
-        verify(productoService).crearProducto(TipoCuenta.CUENTA_AHORROS, 999L, BigDecimal.valueOf(1000), false);
+        verify(productoService).crearProducto(any(ProductoController.CrearProductoRequest.class));
     }
 
     @Test
@@ -118,7 +126,7 @@ class ProductoControllerTest {
         request.setSaldoInicial(BigDecimal.valueOf(1000));
         request.setExentaGmf(false);
 
-        when(productoService.crearProducto(any(TipoCuenta.class), anyLong(), any(BigDecimal.class), anyBoolean()))
+        when(productoService.crearProducto(any(ProductoController.CrearProductoRequest.class)))
                 .thenThrow(new RuntimeException("Error interno"));
 
         // Act & Assert
@@ -127,6 +135,8 @@ class ProductoControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.mensaje").value("Error interno del servidor"));
+
+        verify(productoService).crearProducto(any(ProductoController.CrearProductoRequest.class));
     }
 
     // ========== TESTS BUSCAR PRODUCTO ==========
